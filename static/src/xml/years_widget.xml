@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="om_web_widgets.YearsWidget" owl="1">
+        <div class="o_field_widget o_field_date o_field_years_widget" t-att-class="props.className">
+            <div class="o_datepicker">
+                <div class="o_datepicker_input">
+                    <input 
+                        type="text" 
+                        class="o_input" 
+                        t-att-value="formattedValue"
+                        readonly="readonly"
+                        t-on-click="() => this.openPopover()"/>
+                    <span class="o_datepicker_button" t-on-click="() => this.openPopover()"/>
+                </div>
+            </div>
+            <div class="o_datepicker_popover" t-att-class="{ 'o_hidden': !state.isOpen }">
+                <div class="o_datepicker_header">
+                    <div class="o_datepicker_buttons">
+                        <button class="o_datepicker_button o_datepicker_previous" type="button" t-on-click="() => this.previousYear()">◀</button>
+                        <span class="o_datepicker_title" t-esc="state.currentYear"/>
+                        <button class="o_datepicker_button o_datepicker_next" type="button" t-on-click="() => this.nextYear()">▶</button>
+                    </div>
+                </div>
+                <div class="o_datepicker_content">
+                    <div class="o_datepicker_year">
+                        <t t-foreach="years" t-as="year" t-key="year">
+                            <button type="button" 
+                                    class="o_datepicker_button" 
+                                    t-att-class="{ 'o_selected': year === selectedYear }" 
+                                    t-on-click="() => this.selectYear(year)">
+                                <t t-esc="year"/>
+                            </button>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates> 
