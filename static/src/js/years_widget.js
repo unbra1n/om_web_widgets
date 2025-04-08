@@ -27,11 +27,13 @@ class YearsWidget extends Component {
             <div class="o_datepicker_popover" t-att-class="{ 'o_hidden': !state.isOpen }">
                 <div class="o_datepicker_header">
                     <div class="o_datepicker_buttons">
-                        <button class="o_datepicker_button o_datepicker_decade_previous" title="Previous Decade" type="button" t-on-click="() => this.previousDecade()">«</button>
-                        <button class="o_datepicker_button o_datepicker_previous" title="Previous Year" type="button" t-on-click="() => this.previousYear()">‹</button>
-                        <span class="o_datepicker_title" t-esc="state.currentYear"/>
-                        <button class="o_datepicker_button o_datepicker_next" title="Next Year" type="button" t-on-click="() => this.nextYear()">›</button>
-                        <button class="o_datepicker_button o_datepicker_decade_next" title="Next Decade" type="button" t-on-click="() => this.nextDecade()">»</button>
+                        <button class="o_datepicker_button o_datepicker_range_previous" title="Previous 30 Years" type="button" t-on-click="() => this.previousRange()">
+                            <span class="o_datepicker_range_text">-30</span>
+                        </button>
+                        <span class="o_datepicker_title" t-esc="displayedRange"/>
+                        <button class="o_datepicker_button o_datepicker_range_next" title="Next 30 Years" type="button" t-on-click="() => this.nextRange()">
+                            <span class="o_datepicker_range_text">+30</span>
+                        </button>
                     </div>
                      <button class="btn btn-sm btn-secondary o_datepicker_today" title="Go to Today's Year" t-on-click="() => this.goToToday()">
                         Today
@@ -70,7 +72,7 @@ class YearsWidget extends Component {
         }
         this.state = {
             isOpen: false,
-            currentYear: initialYear,
+            currentYear: initialYear, // This remains the 'center' year for calculations
         };
     }
 
@@ -79,11 +81,21 @@ class YearsWidget extends Component {
     }
 
     get years() {
+        // Display 30 years centered around currentYear (adjust start/end index)
         const current = !isNaN(this.state.currentYear) ? this.state.currentYear : this.currentRealYear;
+        const startYear = current - 14; // Center point for 30 years: -14 to +15
         return Array.from(
-            { length: 61 },
-            (_, i) => current - 30 + i
+            { length: 30 },
+            (_, i) => startYear + i
         );
+    }
+
+    get displayedRange() {
+        // Calculate the first and last year based on the 'years' getter logic
+        const current = !isNaN(this.state.currentYear) ? this.state.currentYear : this.currentRealYear;
+        const startYear = current - 14;
+        const endYear = startYear + 29; // 30 years total
+        return `${startYear} - ${endYear}`;
     }
 
     get selectedYear() {
@@ -110,9 +122,8 @@ class YearsWidget extends Component {
     }
 
     clearValue() {
-        this.props.update(false); // Update field to false
-        this.state.isOpen = false; // Close popover if open
-        // No need to call render explicitly, props update should trigger it
+        this.props.update(false);
+        this.state.isOpen = false;
     }
 
     goToToday() {
@@ -128,23 +139,14 @@ class YearsWidget extends Component {
         }
     }
 
-    previousYear() {
-        this.state.currentYear--;
+    // Methods for range navigation
+    previousRange() {
+        this.state.currentYear -= 30; // Jump 30 years
         this.render();
     }
 
-    nextYear() {
-        this.state.currentYear++;
-        this.render();
-    }
-
-    previousDecade() {
-        this.state.currentYear -= 10;
-        this.render();
-    }
-
-    nextDecade() {
-        this.state.currentYear += 10;
+    nextRange() {
+        this.state.currentYear += 30; // Jump 30 years
         this.render();
     }
 }

@@ -15,31 +15,31 @@
 
         .o_datepicker_input {
             position: relative;
-            display: inline-block;
-            // Let container control width, input takes available space
-            flex-grow: 1; 
-            
-            .o_input {
+            width: 100%;
+
+            input {
+                width: 100%;
+                padding-right: 30px;
                 background-color: white;
-                cursor: pointer;
-                padding-right: 25px; // Space for calendar icon
-                width: 100%; // Fill the container
             }
 
             .o_datepicker_button {
-                background-color: transparent;
-                border: none;
                 position: absolute;
-                top: 2px;
-                right: 4px;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 30px;
+                background: none;
+                border: none;
                 cursor: pointer;
-                padding: 6px;
-                z-index: 2; // Ensure it's above input
-                
-                &::before {
-                    font-family: "FontAwesome";
-                    content: "\f073";
-                    color: #666666;
+
+                &:before {
+                    content: "▼";
+                    position: absolute;
+                    right: 8px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #6c757d;
                 }
             }
         }
@@ -67,104 +67,101 @@
         position: absolute;
         top: 100%;
         left: 0;
-        z-index: 1051;
-        min-width: 241px;
-        max-width: 241px;
-        background-color: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #d9d9d9;
-        border-radius: 3px;
-        margin-top: 2px;
-        padding: 8px;
-        
+        width: 300px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 1000;
+        margin-top: 5px;
+
         &.o_hidden {
             display: none;
         }
 
         .o_datepicker_header {
-            margin-bottom: 8px;
-            padding: 4px;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #e5e5e5;
-            gap: 4px; // Add gap between button groups and today button
-            
+            align-items: center;
+
             .o_datepicker_buttons {
-                // Removed width: 100% to allow space for today button
                 display: flex;
-                // justify-content: space-between; // Let gap handle spacing
                 align-items: center;
-                flex-grow: 1; // Take remaining space
-                justify-content: center; // Center the year navigation group
-                gap: 2px; // Space between nav buttons
-                
-                button {
-                    background: none;
-                    border: none;
-                    padding: 4px 8px;
-                    color: #4c4c4c;
+                gap: 10px;
+
+                .o_datepicker_button {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                    padding: 5px 10px;
                     cursor: pointer;
-                    font-size: 14px;
-                    line-height: 1; // Ensure consistent height
-                    
+                    font-weight: bold;
+                    color: #495057;
+
                     &:hover {
-                        background-color: #f6f7fa;
-                        border-radius: 3px;
+                        background: #e9ecef;
+                    }
+
+                    .o_datepicker_range_text {
+                        font-size: 14px;
+                        font-weight: bold;
                     }
                 }
-                
+
                 .o_datepicker_title {
                     font-weight: bold;
-                    color: #4c4c4c;
-                    padding: 0 5px; // Add some padding around year
+                    color: #495057;
                 }
             }
 
             .o_datepicker_today {
-                // Style for the today button
-                padding: 4px 8px;
-                font-size: 12px;
-                line-height: 1.2;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 5px 8px;
+                cursor: pointer;
+                font-size: 11px;
+                white-space: nowrap;
+                min-width: 60px;
+                text-align: center;
+
+                &:hover {
+                    background: #e9ecef;
+                }
             }
         }
 
         .o_datepicker_content {
+            padding: 10px;
+
             .o_datepicker_year {
                 display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 2px;
-                padding: 4px;
-                
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
+
                 button {
-                    background: none;
-                    border: none;
-                    padding: 6px 8px;
-                    color: #4c4c4c;
+                    padding: 8px;
+                    border: 1px solid #dee2e6;
+                    background: white;
+                    border-radius: 4px;
                     cursor: pointer;
-                    font-size: 13px;
-                    border-radius: 3px;
-                    text-align: center;
-                    
+                    transition: all 0.2s;
+
                     &:hover {
-                        background-color: #f6f7fa;
+                        background: #f8f9fa;
                     }
-                    
-                    // Style for the current real year
-                    &.o_year_today {
-                         font-weight: bold;
-                         border: 1px solid #cccccc;
-                    }
-                    
+
                     &.o_selected {
-                        background-color: #017e84;
+                        background: #0d6efd;
                         color: white;
-                        font-weight: bold;
-                        border-color: transparent; // Remove border if selected
-                        
-                        &:hover {
-                            background-color: darken(#017e84, 5%);
-                        }
+                        border-color: #0d6efd;
+                    }
+
+                    &.o_year_today {
+                        border-color: #0d6efd;
+                        color: #0d6efd;
                     }
                 }
             }
