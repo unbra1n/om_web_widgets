@@ -2,37 +2,35 @@
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, xml } from "@odoo/owl";
+import { Component, xml, useRef, onWillUnmount } from "@odoo/owl";
 import { _lt } from "@web/core/l10n/translation";
-// No explicit DateTime import
 
+// Пример с встроенным шаблоном XML в статическое свойство `template`.
 class YearsWidget extends Component {
-    // Embed the XML template directly
     static template = xml`
-        <div class="o_field_widget o_field_date o_field_years_widget" t-att-class="props.className">
+        <div t-ref="root" class="o_field_widget o_field_date o_field_years_widget" t-att-class="props.className">
             <div class="o_datepicker">
                 <div class="o_datepicker_input_container">
                     <div class="o_datepicker_input">
-                        <input 
-                            type="text" 
-                            class="o_input" 
+                        <input
+                            type="text"
+                            class="o_input"
                             t-att-value="formattedValue"
                             readonly="readonly"
                             t-on-click="() => this.openPopover()"/>
                         <span class="o_datepicker_button" title="Open Calendar" t-on-click="() => this.openPopover()"/>
                     </div>
-                    <span t-if="props.value and !props.readonly" class="fa fa-times o_datepicker_clear" title="Clear" role="button" t-on-click.stop="() => this.clearValue()"/>
-                 </div>
+                </div>
             </div>
             <div class="o_datepicker_popover" t-att-class="{ 'o_hidden': !state.isOpen }">
                 <div class="o_datepicker_header">
                     <div class="o_datepicker_buttons">
                         <button class="o_datepicker_button o_datepicker_range_previous" title="Previous 30 Years" type="button" t-on-click="() => this.previousRange()">
-                            <span class="o_datepicker_range_text">-30</span>
+                            <i class="fa fa-chevron-left"/>
                         </button>
                         <span class="o_datepicker_title" t-esc="displayedRange"/>
                         <button class="o_datepicker_button o_datepicker_range_next" title="Next 30 Years" type="button" t-on-click="() => this.nextRange()">
-                            <span class="o_datepicker_range_text">+30</span>
+                            <i class="fa fa-chevron-right"/>
                         </button>
                     </div>
                      <button class="btn btn-sm btn-secondary o_datepicker_today" title="Go to Today's Year" t-on-click="() => this.goToToday()">
@@ -41,13 +39,17 @@ class YearsWidget extends Component {
                 </div>
                 <div class="o_datepicker_content">
                     <div class="o_datepicker_year">
+                        <!--
+                            Здесь мы добавляем класс .o_year_today, если year === текущий год,
+                            и .o_selected, если year === выбранный в поле год
+                        -->
                         <t t-foreach="years" t-as="year" t-key="year">
-                            <button type="button" 
+                            <button type="button"
                                     class="o_datepicker_button"
                                     t-att-class="{
                                         'o_selected': year === selectedYear,
                                         'o_year_today': year === currentRealYear
-                                    }" 
+                                    }"
                                     t-on-click="() => this.selectYear(year)">
                                 <t t-esc="year"/>
                             </button>
@@ -63,6 +65,10 @@ class YearsWidget extends Component {
     };
 
     setup() {
+        this.root = useRef("root");
+        this._onClickAway = this._onClickAway.bind(this);
+
+        // Определяем начальный "центральный" год (или из значения поля, или текущий)
         let initialYear = new Date().getFullYear();
         if (this.props.value && typeof this.props.value === 'object' && this.props.value.year) {
             const year = this.props.value.year;
@@ -72,32 +78,41 @@ class YearsWidget extends Component {
         }
         this.state = {
             isOpen: false,
-            currentYear: initialYear, // This remains the 'center' year for calculations
+            currentYear: initialYear,
         };
+
+        onWillUnmount(() => {
+            document.removeEventListener("click", this._onClickAway, true);
+        });
     }
 
+    _onClickAway(event) {
+        if (this.root.el && !this.root.el.contains(event.target)) {
+            this.closePopover();
+        }
+    }
+
+    // Год "сейчас" (по системной дате)
     get currentRealYear() {
         return new Date().getFullYear();
     }
 
+    // Список годов для отображения (например, 30 лет вокруг выбранного)
     get years() {
-        // Display 30 years centered around currentYear (adjust start/end index)
-        const current = !isNaN(this.state.currentYear) ? this.state.currentYear : this.currentRealYear;
-        const startYear = current - 14; // Center point for 30 years: -14 to +15
-        return Array.from(
-            { length: 30 },
-            (_, i) => startYear + i
-        );
-    }
-
-    get displayedRange() {
-        // Calculate the first and last year based on the 'years' getter logic
         const current = !isNaN(this.state.currentYear) ? this.state.currentYear : this.currentRealYear;
         const startYear = current - 14;
-        const endYear = startYear + 29; // 30 years total
+        return Array.from({ length: 30 }, (_, i) => startYear + i);
+    }
+
+    // Для строки "XXXX - YYYY"
+    get displayedRange() {
+        const current = !isNaN(this.state.currentYear) ? this.state.currentYear : this.currentRealYear;
+        const startYear = current - 14;
+        const endYear = startYear + 29;
         return `${startYear} - ${endYear}`;
     }
 
+    // Текущий выбранный год (из значения поля)
     get selectedYear() {
         if (this.props.value && typeof this.props.value === 'object' && this.props.value.year) {
              const year = this.props.value.year;
@@ -106,6 +121,7 @@ class YearsWidget extends Component {
         return null;
     }
 
+    // Форматированное значение в инпуте
     get formattedValue() {
          return this.selectedYear ? String(this.selectedYear) : '';
     }
@@ -117,13 +133,7 @@ class YearsWidget extends Component {
         } catch (e) {
             console.error("Error creating/updating date:", e);
         }
-        this.state.isOpen = false;
-        this.render();
-    }
-
-    clearValue() {
-        this.props.update(false);
-        this.state.isOpen = false;
+        this.closePopover();
     }
 
     goToToday() {
@@ -133,26 +143,39 @@ class YearsWidget extends Component {
 
     openPopover() {
         if (!this.props.readonly) {
-            this.state.isOpen = true;
-            this.state.currentYear = this.selectedYear || this.currentRealYear;
+            this.state.isOpen = !this.state.isOpen;
+            if (this.state.isOpen) {
+                this.state.currentYear = this.selectedYear || this.currentRealYear;
+                document.addEventListener("click", this._onClickAway, true);
+            } else {
+                document.removeEventListener("click", this._onClickAway, true);
+            }
             this.render();
         }
     }
 
-    // Methods for range navigation
+    closePopover() {
+        if (this.state.isOpen) {
+            this.state.isOpen = false;
+            document.removeEventListener("click", this._onClickAway, true);
+            this.render();
+        }
+    }
+
+    // Навигация по "блокам" лет (пред/след 30 лет)
     previousRange() {
-        this.state.currentYear -= 30; // Jump 30 years
+        this.state.currentYear -= 30;
         this.render();
     }
 
     nextRange() {
-        this.state.currentYear += 30; // Jump 30 years
+        this.state.currentYear += 30;
         this.render();
     }
 }
 
-// Keep static properties and registration AFTER the class definition
 YearsWidget.displayName = _lt("Year");
 YearsWidget.supportedTypes = ["date"];
 
-registry.category("fields").add("years_widget", YearsWidget); 
+// Регистрируем виджет
+registry.category("fields").add("years_widget", YearsWidget);

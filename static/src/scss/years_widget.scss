@@ -5,8 +5,7 @@
     .o_datepicker {
         position: relative;
         width: 100%;
-        
-        // New container to position input and clear button
+
         .o_datepicker_input_container {
             position: relative;
             display: flex;
@@ -43,24 +42,6 @@
                 }
             }
         }
-
-        // Style for the clear button
-        .o_datepicker_clear {
-            position: absolute;
-            right: 28px; // Position next to calendar icon
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #aaaaaa;
-            font-size: 0.9em;
-            padding: 0 3px;
-            z-index: 2;
-            background: white; // To cover input text if needed
-
-            &:hover {
-                color: #666666;
-            }
-        }
     }
 
     .o_datepicker_popover {
@@ -80,7 +61,7 @@
         }
 
         .o_datepicker_header {
-            padding: 10px;
+            padding: 10px 12px;
             border-bottom: 1px solid #dee2e6;
             display: flex;
             justify-content: space-between;
@@ -89,13 +70,13 @@
             .o_datepicker_buttons {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 12px;
 
                 .o_datepicker_button {
                     background: #f8f9fa;
                     border: 1px solid #dee2e6;
                     border-radius: 4px;
-                    padding: 5px 10px;
+                    padding: 6px 12px;
                     cursor: pointer;
                     font-weight: bold;
                     color: #495057;
@@ -104,15 +85,15 @@
                         background: #e9ecef;
                     }
 
-                    .o_datepicker_range_text {
+                    i {
                         font-size: 14px;
-                        font-weight: bold;
                     }
                 }
 
                 .o_datepicker_title {
                     font-weight: bold;
                     color: #495057;
+                    font-size: 15px;
                 }
             }
 
@@ -153,18 +134,32 @@
                         background: #f8f9fa;
                     }
 
+                    /* Если год выбран */
                     &.o_selected {
                         background: #0d6efd;
                         color: white;
                         border-color: #0d6efd;
                     }
 
+                    /* Если год - текущий (сегодня) */
                     &.o_year_today {
+                        background: transparent;
                         border-color: #0d6efd;
                         color: #0d6efd;
+                    }
+
+                    /*
+                      Если и .o_selected, и .o_year_today
+                      (то есть выбран именно текущий год),
+                      убираем заливку, оставляем обводку и синий текст
+                    */
+                    &.o_year_today.o_selected {
+                        background: transparent !important;
+                        color: #0d6efd !important;
+                        border-color: #0d6efd !important;
                     }
                 }
             }
         }
     }
-} 
+}
